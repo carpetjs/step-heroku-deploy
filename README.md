@@ -46,6 +46,8 @@ deploy:
         - heroku-deploy:
             key-name: MY_DEPLOY_KEY
             app-name: MY_HEROKU_APP
+            pre-run: ps:stop
+            post-run: ps:restart
 ```
 
 # Special thanks

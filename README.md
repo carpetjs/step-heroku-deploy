@@ -26,15 +26,16 @@ In the above example the `MY_DEPLOY_KEY` should match the environment variable n
 
 # What's new
 
-- Remove some changing of directories
-- Mark `source_dir` as deprecated. In a future version this will be replaced with `cwd`, currently they however are not compatible.
+- Optional pre-command to run a command on heroku.
 
 # Options
 
 * `key-name` (optional) Specify the name of the key that should be used for this deployment. If left empty, a temporary key will be created for the deployment.
+* `app-name` the name of the heroku app
 * `retry` (optional) When a deploy to Heroku fails, a new deploy is automatically performed after 5 seconds. If you want to disable this behavior, set `retry` to `false`.
-* `run` (optional) Run a command on heroku after the code is deployed succesfully. This option can be used to migrate the database for example.
-* `install-toolbelt` (optional). If set to 'true', the toolbelt will be installed. Note: specifying a run command will also install the toolbelt.
+* `pre-run` (optional) Run a command on heroku before the code is deployed. This option can be used to set the instance to maintenance for example.
+* `post-run` (optional) Run a command on heroku after the code is deployed succesfully. This option can be used to migrate the database for example.
+* `install-toolbelt` (optional). If set to 'true', the toolbelt will be installed. Note: specifying a (pre/post)run command will also install the toolbelt.
 * `keep-repository` (optional) This will allow a user to keep the original history of the repository, speeding up deployment. **Important:** changes made during the build will not be deployed. Also keep in mind that deploying an already up to date repo will not result in an application restart. Use the `run` parameter to forcibly reload to achieve this. This feature is considered beta, expect issues. If you find one, please contact us.
 
 # Example
@@ -44,6 +45,7 @@ deploy:
     steps:
         - heroku-deploy:
             key-name: MY_DEPLOY_KEY
+            app-name: MY_HEROKU_APP
 ```
 
 # Special thanks
@@ -55,6 +57,10 @@ deploy:
 The MIT License (MIT)
 
 # Changelog
+
+## 2.2.2
+
+- pre and post run command
 
 ## 2.2.1
 

@@ -292,6 +292,27 @@ else
     use_new_git_repository "$WERCKER_HEROKU_DEPLOY_SOURCE_DIR";
 fi
 
+
+if [ "$WERCKER_HEROKU_DEPLOY_INSTALL_TOOLBELT" == "true" -o -n "$WERCKER_HEROKU_DEPLOY_POST_RUN" -o -n "$WERCKER_HEROKU_DEPLOY_PRE_RUN" ]; then
+    set +e;
+    install_toolbelt;
+    set -e;
+fi
+
+# Run a command, if the push succeeded and the user supplied a run command
+if [ -n "$WERCKER_HEROKU_DEPLOY_PRE_RUN" ]; then
+    if [ $exit_code_push -eq 0 ]; then
+        set +e;
+        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_PRE_RUN";
+        exit_code_pre_run=$?
+        set -e;
+    fi
+fi
+
+if [ $exit_code_pre_run -ne 0 ]; then
+    fail 'heroku run failed';
+fi
+
 # Try to push the code
 set +e;
 push_code "$WERCKER_HEROKU_DEPLOY_APP_NAME";
@@ -313,19 +334,12 @@ if [ $exit_code_push -ne 0 ]; then
     fi
 fi
 
-
-if [ "$WERCKER_HEROKU_DEPLOY_INSTALL_TOOLBELT" == "true" -o -n "$WERCKER_HEROKU_DEPLOY_RUN" ]; then
-    set +e;
-    install_toolbelt;
-    set -e;
-fi
-
 # Run a command, if the push succeeded and the user supplied a run command
-if [ -n "$WERCKER_HEROKU_DEPLOY_RUN" ]; then
+if [ -n "$WERCKER_HEROKU_DEPLOY_POST_RUN" ]; then
     if [ $exit_code_push -eq 0 ]; then
         set +e;
-        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_RUN";
-        exit_code_run=$?
+        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_POST_RUN";
+        exit_code_post_run=$?
         set -e;
     fi
 fi
@@ -335,7 +349,7 @@ if [ -z "$WERCKER_HEROKU_DEPLOY_KEY_NAME" ]; then
     remove_ssh_key "${ssh_key_path}.pub";
 fi
 
-if [ $exit_code_run -ne 0 ]; then
+if [ $exit_code_post_run -ne 0 ]; then
     fail 'heroku run failed';
 fi
 

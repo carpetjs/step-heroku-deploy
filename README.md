@@ -20,6 +20,9 @@ deploy:
     steps:
         - heroku-deploy:
             key-name: MY_DEPLOY_KEY
+            app-name: $MY_HEROKU_APP
+            pre-run: ps:stop
+            post-run: ps:restart
 ```
 
 In the above example the `MY_DEPLOY_KEY` should match the environment variable name you used in wercker. Note: you should not prefix it with a dollar sign or post fix it with `_PRIVATE` or `_PUBLIC`.
@@ -45,7 +48,7 @@ deploy:
     steps:
         - heroku-deploy:
             key-name: MY_DEPLOY_KEY
-            app-name: MY_HEROKU_APP
+            app-name: $MY_HEROKU_APP
             pre-run: ps:stop
             post-run: ps:restart
 ```

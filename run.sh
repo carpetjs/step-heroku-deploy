@@ -150,11 +150,11 @@ execute_heroku_command() {
     local command="$2";
 
     debug "starting heroku $command";
-    heroku "$command" --app $app_name;
+    heroku $command --app=$app_name;
     local exit_code_run=$?;
 
-    debug "heroku run exited with $exit_code_run";
-    return $exit_code_run;
+    debug "heroku cmd exited with $exit_code_cmd";
+    return $exit_code_cmd;
 }
 
 add_ssh_key() {

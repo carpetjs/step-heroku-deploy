@@ -151,7 +151,7 @@ execute_heroku_command() {
 
     debug "starting heroku $command";
     heroku $command --app=$app_name;
-    local exit_code_run=$?;
+    local exit_code_cmd=$?;
 
     debug "heroku cmd exited with $exit_code_cmd";
     return $exit_code_cmd;
@@ -264,7 +264,7 @@ ssh_key_path="$(mktemp -d)/id_rsa";
 gitssh_path="$(mktemp)";
 error_suffix='Please add this option to the wercker.yml or add a heroku deployment target on the website which will set these options for you.';
 exit_code_push=0;
-exit_code_run=0;
+exit_code_cmd=0;
 
 # Initialize some values
 init_wercker_environment_variables;
@@ -301,16 +301,14 @@ fi
 
 # Run a command, if the push succeeded and the user supplied a run command
 if [ -n "$WERCKER_HEROKU_DEPLOY_PRE_CMD" ]; then
-    if [ $exit_code_push -eq 0 ]; then
-        set +e;
-        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_PRE_CMD";
-        exit_code_pre_cmd=$?
-        set -e;
-    fi
+    set +e;
+    execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_PRE_CMD";
+    exit_code_cmd=$?
+    set -e;
 fi
 
-if [ $exit_code_pre_cmd -ne 0 ]; then
-    fail 'heroku run failed';
+if [ $exit_code_cmd -ne 0 ]; then
+    fail 'heroku pre-cmd failed';
 fi
 
 # Try to push the code
@@ -339,7 +337,7 @@ if [ -n "$WERCKER_HEROKU_DEPLOY_POST_CMD" ]; then
     if [ $exit_code_push -eq 0 ]; then
         set +e;
         execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_POST_CMD";
-        exit_code_post_cmd=$?
+        exit_code_cmd=$?
         set -e;
     fi
 fi
@@ -349,8 +347,8 @@ if [ -z "$WERCKER_HEROKU_DEPLOY_KEY_NAME" ]; then
     remove_ssh_key "${ssh_key_path}.pub";
 fi
 
-if [ $exit_code_post_cmd -ne 0 ]; then
-    fail 'heroku run failed';
+if [ $exit_code_cmd -ne 0 ]; then
+    fail 'heroku post-cmd failed';
 fi
 
 if [ $exit_code_push -eq 0 ]; then

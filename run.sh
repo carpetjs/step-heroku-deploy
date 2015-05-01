@@ -149,8 +149,8 @@ execute_heroku_command() {
     local app_name="$1";
     local command="$2";
 
-    debug "starting heroku run $command";
-    heroku run "$command" --app $app_name;
+    debug "starting heroku $command";
+    heroku "$command" --app $app_name;
     local exit_code_run=$?;
 
     debug "heroku run exited with $exit_code_run";
@@ -293,23 +293,23 @@ else
 fi
 
 
-if [ "$WERCKER_HEROKU_DEPLOY_INSTALL_TOOLBELT" == "true" -o -n "$WERCKER_HEROKU_DEPLOY_POST_RUN" -o -n "$WERCKER_HEROKU_DEPLOY_PRE_RUN" ]; then
+if [ "$WERCKER_HEROKU_DEPLOY_INSTALL_TOOLBELT" == "true" -o -n "$WERCKER_HEROKU_DEPLOY_POST_CMD" -o -n "$WERCKER_HEROKU_DEPLOY_PRE_CMD" ]; then
     set +e;
     install_toolbelt;
     set -e;
 fi
 
 # Run a command, if the push succeeded and the user supplied a run command
-if [ -n "$WERCKER_HEROKU_DEPLOY_PRE_RUN" ]; then
+if [ -n "$WERCKER_HEROKU_DEPLOY_PRE_CMD" ]; then
     if [ $exit_code_push -eq 0 ]; then
         set +e;
-        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_PRE_RUN";
-        exit_code_pre_run=$?
+        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_PRE_CMD";
+        exit_code_pre_cmd=$?
         set -e;
     fi
 fi
 
-if [ $exit_code_pre_run -ne 0 ]; then
+if [ $exit_code_pre_cmd -ne 0 ]; then
     fail 'heroku run failed';
 fi
 
@@ -335,11 +335,11 @@ if [ $exit_code_push -ne 0 ]; then
 fi
 
 # Run a command, if the push succeeded and the user supplied a run command
-if [ -n "$WERCKER_HEROKU_DEPLOY_POST_RUN" ]; then
+if [ -n "$WERCKER_HEROKU_DEPLOY_POST_CMD" ]; then
     if [ $exit_code_push -eq 0 ]; then
         set +e;
-        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_POST_RUN";
-        exit_code_post_run=$?
+        execute_heroku_command "$WERCKER_HEROKU_DEPLOY_APP_NAME" "$WERCKER_HEROKU_DEPLOY_POST_CMD";
+        exit_code_post_cmd=$?
         set -e;
     fi
 fi
@@ -349,7 +349,7 @@ if [ -z "$WERCKER_HEROKU_DEPLOY_KEY_NAME" ]; then
     remove_ssh_key "${ssh_key_path}.pub";
 fi
 
-if [ $exit_code_post_run -ne 0 ]; then
+if [ $exit_code_post_cmd -ne 0 ]; then
     fail 'heroku run failed';
 fi
 

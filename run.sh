@@ -286,10 +286,10 @@ else
 fi
 
 # Then check if the user wants to use the git repository or use the files in the source directory
-if [ "$WERCKER_HEROKU_DEPLOY_KEEP_REPOSITORY" == "true" ]; then
-    use_current_git_directory "$WERCKER_HEROKU_DEPLOY_SOURCE_DIR" "$WERCKER_GIT_BRANCH";
-else
+if [ "$WERCKER_HEROKU_DEPLOY_EMPTY_REPOSITORY" == "true" ]; then
     use_new_git_repository "$WERCKER_HEROKU_DEPLOY_SOURCE_DIR";
+else
+    use_current_git_directory "$WERCKER_HEROKU_DEPLOY_SOURCE_DIR" "$WERCKER_GIT_BRANCH";
 fi
 
 
